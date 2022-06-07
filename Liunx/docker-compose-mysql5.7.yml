@@ -1,7 +1,7 @@
-version: '3'
+version: '3.1'
 services:
   mysql:
-    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/mysql:5.7  # 原镜像`mysql:5.7`
+    image: mysql:5.7.38  # 原镜像`mysql:5.7`
     container_name: mysql_3306                                    # 容器名为'mysql_3306'
     restart: unless-stopped                                               # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
     volumes:                                                      # 数据卷挂载路径设置,将本机目录映射到容器目录
@@ -9,10 +9,24 @@ services:
       - "./mysql5.7/data:/var/lib/mysql"
 #      - "./mysql5.7/conf.d:/etc/mysql/conf.d"
       - "./mysql5.7/log/mysql/error.log:/var/log/mysql/error.log"
+#      数据库还原目录 可将需要还原的sql文件放在这里
+      - "./mysql5.7/init/:/docker-entrypoint-initdb.d/"
     environment:                        # 设置环境变量,相当于docker run命令中的-e
       TZ: Asia/Shanghai
       LANG: en_US.UTF-8
-      MYSQL_ROOT_PASSWORD: root         # 设置root用户密码
-      MYSQL_DATABASE: demo              # 初始化的数据库名称
-    ports:                              # 映射端口
-      - "3306:3306"
+      MYSQL_ROOT_PASSWORD: peiqi666         # 设置root用户密码
+ #     MYSQL_DATABASE: demo              # 初始化的数据库名称
+ #   ports:                              # 映射端口  注意：host port不兼容
+ #     - "3306:3306"
+    privileged: true #  使用该参数，container内的root拥有真正的root权限。
+    network_mode: host
+
+
+#      # 使用声明的网络
+#      networks:
+#        - laravel
+#    # 声明网络
+#    networks:
+#      laravel:
+#        # 该网络是外部的网络
+#        external: true
