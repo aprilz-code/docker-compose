@@ -2,57 +2,60 @@ version: '3.5'
 services:
   # mq服务
   rocketmq_server:
-    image: foxiswho/rocketmq:server
+    image: apache/rocketmq:4.9.4
+    restart: always
     container_name: rocketmq_server
+    environment:
+      JAVA_OPT_EXT: "-server -Xms64m -Xmx64m -Xmn64m"
     ports:
       - 9876:9876
+    command: sh mqnamesrv
     volumes:
-      - ./rocketmq/rocketmq_server/logs:/opt/logs
-      - ./rocketmq/rocketmq_server/store:/opt/store
+      # 映射本地目录权限一定要设置为 777 权限，否则启动不成功
+      - ./log/rocketmq_server:/home/rocketmq/logs
+      # - ./rocketmq/rocketmq_server/store:/home/rocketmq/store
+    privileged: true #  使用该参数，container内的root拥有真正的root权限。
     networks:
-      rocketmq:
-        aliases:
-          - rocketmq_server
+      - ap
 
   # mq中间件
   rocketmq_broker:
-    image: foxiswho/rocketmq:broker
+    image: apache/rocketmq:4.9.4
+    restart: always
     container_name: rocketmq_broker
     ports:
       - 10909:10909
       - 10911:10911
     volumes:
-      - ./rocketmq/rocketmq_broker/logs:/opt/logs
-      - ./rocketmq/rocketmq_broker/store:/opt/store
+      - ./log/rocketmq_broker:/home/rocketmq/logs
+      - ./rocketmq/rocketmq_broker/store:/home/rocketmq/store
       - ./rocketmq/rocketmq_broker/conf/broker.conf:/etc/rocketmq/broker.conf
     environment:
       NAMESRV_ADDR: "rocketmq_server:9876"
       JAVA_OPTS: " -Duser.home=/opt"
       JAVA_OPT_EXT: "-server -Xms128m -Xmx128m -Xmn128m"
-    command: mqbroker -c /etc/rocketmq/broker.conf
+    command: sh mqbroker -c /etc/rocketmq/broker.conf
     depends_on:
       - rocketmq_server
+    privileged: true #  使用该参数，container内的root拥有真正的root权限。
     networks:
-      rocketmq:
-        aliases:
-          - rocketmq_broker
+      - ap
 
   # mq可视化控制台
-  rocketmq_console_ng:
-    image: styletang/rocketmq-console-ng
-    container_name: rocketmq_console_ng
+  rocketmq_console:
+    image: apacherocketmq/rocketmq-dashboard:1.0.0
+    restart: always
+    container_name: rocketmq_console
     ports:
-      - 9002:8080
+      - 8180:8180
     environment:
-      JAVA_OPTS: "-Drocketmq.namesrv.addr=rocketmq_server:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false"
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=rocketmq_server:9876 -Dserver.port=8180 -Drocketmq.config.isVIPChannel=false"
+      JAVA_OPT_EXT: "-Xms128m -Xmx128m -Xmn128m"
     depends_on:
       - rocketmq_server
     networks:
-      rocketmq:
-        aliases:
-          - rocketmq_console_ng
+      - ap
 
 networks:
-  rocketmq:
-    name: rocketmq
-    driver: bridge
+  ap:
+    external: true
