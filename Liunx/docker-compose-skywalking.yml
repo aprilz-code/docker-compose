@@ -25,7 +25,11 @@ services:
     ports:
       - 18080:8080
     environment:
-      - SW_OAP_ADDRESS=oap-server:12800
+      - TZ=Asia/Shanghai
+      -  LANG=en_US.UTF-8
+#      - SW_OAP_ADDRESS=oap-server:12800
+## 上面这种会导致白屏
+      - SW_OAP_ADDRESS=http://oap-server:12800
     depends_on:
       - oap-server
     networks:
