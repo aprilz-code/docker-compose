@@ -1,0 +1,31 @@
+version: '3'
+services:
+  oap-server:
+    image: apache/skywalking-oap-server:9.2.0
+    ports:
+      - 11800:11800 # 数据采集接口
+      - 12800:12800  # ui通信接口
+    environment:
+      - SW_STORAGE=mysql
+      - SW_STORAGE_MYSQL_HOST=your_mysql_host
+      - SW_STORAGE_MYSQL_PORT=3306
+      - SW_STORAGE_MYSQL_DB=skywalking
+      - SW_STORAGE_MYSQL_USER=your_mysql_user
+      - SW_STORAGE_MYSQL_PASSWORD=your_mysql_password
+    networks:
+      - ap
+
+  ui:
+    image: apache/skywalking-ui:9.2.0
+    ports:
+      - 18080:8080
+    environment:
+      - SW_OAP_ADDRESS=oap-server:12800
+    depends_on:
+      - oap-server
+    networks:
+      - ap
+
+networks:
+  ap:
+    driver: bridge
