@@ -3,6 +3,7 @@ services:
   oap-server:
     #image: apache/skywalking-oap-server:9.2.0
     image: registry.cn-shenzhen.aliyuncs.com/whiteblog/skywalking-oap-server-mysql:9.2.0
+    restart: always
     container_name: skywalking-oap-server
     ports:
       - 11800:11800 # 数据采集接口
@@ -21,6 +22,7 @@ services:
 
   ui:
     image: apache/skywalking-ui:9.2.0
+    restart: always
     container_name: skywalking-ui
     ports:
       - 18080:8080
