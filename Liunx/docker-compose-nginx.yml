@@ -15,3 +15,10 @@ services:
       LANG: en_US.UTF-8
     ports:                              # 映射端口
       - "80:80"
+      - "443:443"
+    privileged: true #  使用该参数，container内的root拥有真正的root权限。
+    networks:
+      - ap
+networks:
+  ap:
+    external: true
